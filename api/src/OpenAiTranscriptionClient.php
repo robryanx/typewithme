@@ -9,10 +9,13 @@ final class OpenAiTranscriptionClient
 {
     public const ENDPOINT = 'https://api.openai.com/v1/audio/transcriptions';
 
-    // These are chat messages for online games: no punctuation unless the
-    // speaker really says several sentences.
-    public const STYLE_PROMPT = 'These are short chat messages typed into an online game by kids. '
-        . 'Transcribe exactly the words spoken, with no punctuation unless the speaker clearly says multiple separate sentences.';
+    // These are chat messages for online games: kids dictate one short line
+    // and punctuation only means extra characters to type. The prompt is the
+    // only style lever OpenAI gives us, so spell the rules out explicitly.
+    public const STYLE_PROMPT = 'Kids are dictating short chat messages to send in online games like Roblox or Minecraft. '
+        . 'Transcribe exactly the words they say. Add no punctuation at all: no commas, no full stops, no question marks, '
+        . 'no exclamation marks, no colons, no emojis. The only exception: if the recording clearly contains several '
+        . 'separate sentences, separate those sentences with full stops and add no other punctuation.';
 
     /** @var callable(string, string, array<string, string>, string): array{status: int, body: string} */
     private $transport;
@@ -66,7 +69,8 @@ final class OpenAiTranscriptionClient
 
     private function buildMultipart(string $boundary, string $filename, string $audio, string $prompt): string
     {
-        $fields = ['model' => $this->model, 'response_format' => 'json', 'prompt' => $prompt];
+        // temperature 0 keeps the transcription literal instead of creative.
+        $fields = ['model' => $this->model, 'response_format' => 'json', 'prompt' => $prompt, 'temperature' => '0'];
         $parts = [];
         foreach ($fields as $name => $value) {
             $parts[] = "--{$boundary}\r\nContent-Disposition: form-data; name=\"{$name}\"\r\n\r\n{$value}\r\n";
