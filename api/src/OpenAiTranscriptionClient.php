@@ -43,13 +43,17 @@ final class OpenAiTranscriptionClient
         );
 
         if ($result['status'] >= 400) {
-            throw new DomainException('Transcription failed (HTTP ' . $result['status'] . ').', 502);
+            // Log the upstream failure for diagnosis; the body carries no secrets.
+            error_log('OpenAI transcription failed (HTTP ' . $result['status'] . '): ' . substr($result['body'], 0, 500));
+            throw new DomainException('Transcription failed (HTTP ' . $result['status'] . ').', 500);
         }
 
         $decoded = json_decode($result['body'], true);
         $text = is_array($decoded) && isset($decoded['text']) && is_string($decoded['text']) ? trim($decoded['text']) : '';
         if ($text === '') {
-            throw new DomainException('The transcription service returned no text.', 502);
+            // 422 so Cloudflare passes our message through untouched (it
+            // replaces 502/504 responses with its own error page).
+            throw new DomainException('I could not hear any words in that recording — try again a little louder and closer to the mic.', 422);
         }
 
         return $text;
@@ -90,8 +94,7 @@ final class OpenAiTranscriptionClient
         $response = curl_exec($handle);
         if (!is_string($response)) {
             $error = curl_error($handle);
-            curl_close($handle);
-            throw new DomainException('Could not reach the transcription service: ' . $error, 502);
+            throw new DomainException('Could not reach the transcription service: ' . $error, 500);
         }
         $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
 

@@ -34,11 +34,11 @@ final class OpenAiTranscriptionClientTest extends TestCase
         $client->transcribe('', 'speech.webm');
     }
 
-    public function testTranscribeMapsUpstreamFailureToBadGateway(): void
+    public function testTranscribeMapsUpstreamFailureToServerError(): void
     {
         $client = new OpenAiTranscriptionClient('test-key', 'gpt-transcribe', static fn(): array => ['status' => 401, 'body' => '{"error":"bad key"}']);
         $this->expectException(DomainException::class);
-        $this->expectExceptionCode(502);
+        $this->expectExceptionCode(500);
         $client->transcribe('audio', 'speech.webm');
     }
 
@@ -46,7 +46,9 @@ final class OpenAiTranscriptionClientTest extends TestCase
     {
         $client = new OpenAiTranscriptionClient('test-key', 'gpt-transcribe', static fn(): array => ['status' => 200, 'body' => '{"unexpected":true}']);
         $this->expectException(DomainException::class);
-        $this->expectExceptionCode(502);
+        // 422, not 502: Cloudflare replaces origin 502/504 responses with its
+        // own error page, which would hide the kid-friendly message.
+        $this->expectExceptionCode(422);
         $client->transcribe('audio', 'speech.webm');
     }
 }
