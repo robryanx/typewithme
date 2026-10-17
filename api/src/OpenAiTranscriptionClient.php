@@ -9,6 +9,11 @@ final class OpenAiTranscriptionClient
 {
     public const ENDPOINT = 'https://api.openai.com/v1/audio/transcriptions';
 
+    // These are chat messages for online games: no punctuation unless the
+    // speaker really says several sentences.
+    public const STYLE_PROMPT = 'These are short chat messages typed into an online game by kids. '
+        . 'Transcribe exactly the words spoken, with no punctuation unless the speaker clearly says multiple separate sentences.';
+
     /** @var callable(string, string, array<string, string>, string): array{status: int, body: string} */
     private $transport;
 
@@ -31,7 +36,7 @@ final class OpenAiTranscriptionClient
         }
 
         $boundary = 'typewithme-' . bin2hex(random_bytes(16));
-        $body = $this->buildMultipart($boundary, $filename, $audio);
+        $body = $this->buildMultipart($boundary, $filename, $audio, self::STYLE_PROMPT);
         $result = ($this->transport)(
             'POST',
             self::ENDPOINT,
@@ -59,9 +64,9 @@ final class OpenAiTranscriptionClient
         return $text;
     }
 
-    private function buildMultipart(string $boundary, string $filename, string $audio): string
+    private function buildMultipart(string $boundary, string $filename, string $audio, string $prompt): string
     {
-        $fields = ['model' => $this->model, 'response_format' => 'json'];
+        $fields = ['model' => $this->model, 'response_format' => 'json', 'prompt' => $prompt];
         $parts = [];
         foreach ($fields as $name => $value) {
             $parts[] = "--{$boundary}\r\nContent-Disposition: form-data; name=\"{$name}\"\r\n\r\n{$value}\r\n";

@@ -22,6 +22,9 @@ final class OpenAiTranscriptionClientTest extends TestCase
         self::assertStringContainsString('multipart/form-data; boundary=', $captured['headers']['Content-Type']);
         self::assertStringContainsString('name="model"', $captured['body']);
         self::assertStringContainsString('gpt-transcribe', $captured['body']);
+        // Chat-message style instruction travels with every request.
+        self::assertStringContainsString('name="prompt"', $captured['body']);
+        self::assertStringContainsString('no punctuation unless', $captured['body']);
         self::assertStringContainsString('name="file"; filename="speech.webm"', $captured['body']);
         self::assertStringContainsString('RIFF-fake-audio', $captured['body']);
     }
