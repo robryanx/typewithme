@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react", "jest", "import"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {},
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
+  "globals": {
+    "cy": "readonly"
+  },
+  "overrides": [
+    {
+      "files": ["cypress/**/*.ts"],
+      "rules": {
+        "jest/valid-expect": "off"
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "name": "typewithme",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "api": "php -S 127.0.0.1:8080 api/router.php",
+    "build": "vite build",
+    "serve": "bun run build && php -S 0.0.0.0:8000 api/router.php",
+    "preview": "vite preview",
+    "test:js": "bun test src",
+    "test:php": "composer test",
+    "test": "bun run test:js && bun run test:php",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint:php": "out=$(php bin/pretty-php.phar --check api index.php tests 2>&1); code=$?; printf '%s\\n' \"$out\"; printf '%s\\n' \"$out\" | grep -q '^\\^ ' && { echo 'lint:php FAIL: pretty-php reports problems (braceless control-structure body or empty statement); add braces.' >&2; exit 1; }; exit $code",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "format:php": "php bin/pretty-php.phar api index.php tests",
+    "format:php:check": "php bin/pretty-php.phar --check api index.php tests",
+    "stan": "composer stan",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p cypress",
+    "fix": "oxlint --fix && oxfmt && php bin/pretty-php.phar api index.php tests",
+    "check": "bun run format:check && bun run format:php:check && bun run lint:php && bun run lint && bun run typecheck && bun run lint:css && bun run test && bun run stan && bun run build",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open",
+    "test:e2e:ci": "start-server-and-test 'bun run serve' http://127.0.0.1:8000 'bun run test:e2e'"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "bun-types": "^1.4.1",
+    "cypress": "^16.0.0",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.81.0",
+    "start-server-and-test": "^3.0.12",
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0",
+    "typescript": "^7.0.2"
+  },
+  "stylelint": {
+    "extends": [
+      "stylelint-config-standard"
+    ],
+    "rules": {
+      "no-descending-specificity": null,
+      "no-duplicate-selectors": null
+    }
+  },
+  "packageManager": "bun@1.4.0"
+}

@@ -1,0 +1,199 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #fffdf3;
+  color: #090909;
+}
+
+.app {
+  margin: 0 auto;
+  padding: 24px;
+  max-width: 760px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.tagline {
+  margin: 6px 0 24px;
+  color: #555;
+}
+
+.mic {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #090909;
+  background: #ddf75b;
+  border: 2px solid #090909;
+  border-radius: 14px;
+  box-shadow: 4px 4px #090909;
+  cursor: pointer;
+}
+
+.mic:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.mic.recording {
+  background: #ff5b5b;
+  color: #fff;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 4px 4px #7d1010;
+  }
+}
+
+.error {
+  color: #a01414;
+}
+
+.manual {
+  margin-top: 32px;
+}
+
+.manual textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 12px;
+  font: inherit;
+  box-sizing: border-box;
+  border: 2px solid #090909;
+  border-radius: 10px;
+}
+
+button.primary,
+.actions button {
+  font: inherit;
+  font-weight: 700;
+  padding: 12px 18px;
+  border: 2px solid #090909;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #ddf75b;
+  box-shadow: 3px 3px #090909;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.practice {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.display-shell {
+  position: relative;
+  padding: 18px;
+  background: #fff;
+  border: 2px solid #090909;
+  border-radius: 12px;
+  cursor: text;
+}
+
+.text-display {
+  margin: 0;
+  font-family: 'DejaVu Sans Mono', monospace;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.text-display .pending {
+  color: #9d9d94;
+}
+
+.text-display .correct {
+  color: #157a26;
+}
+
+.text-display .wrong {
+  color: #d01717;
+  background: #ffe3e3;
+  border-radius: 3px;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.3em;
+  margin-right: -2px;
+  background: #090909;
+  vertical-align: text-bottom;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* The real input is invisible; the display above renders all feedback. */
+.practice-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  font: inherit;
+  color: transparent;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  resize: none;
+  opacity: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.stats {
+  margin: 0;
+  color: #555;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.complete {
+  margin: 0;
+  padding: 14px;
+  font-weight: 700;
+  background: #ddf75b;
+  border: 2px solid #090909;
+  border-radius: 10px;
+}
