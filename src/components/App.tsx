@@ -9,8 +9,17 @@ export function normalizeText(text: string): string {
   return text.replace(/\s+/g, ' ').trim();
 }
 
+function initialView(): View {
+  // The mic cannot be scripted in a headless browser, so Cypress injects
+  // practice text with ?text=... in the URL. It only starts a local
+  // practice view — no API, no stored data.
+  const injected = new URLSearchParams(window.location.search).get('text');
+  const clean = injected === null ? '' : normalizeText(injected);
+  return clean === '' ? { kind: 'home' } : { kind: 'practice', text: clean };
+}
+
 export function App() {
-  const [view, setView] = useState<View>({ kind: 'home' });
+  const [view, setView] = useState<View>(initialView);
 
   if (view.kind === 'practice') {
     return (

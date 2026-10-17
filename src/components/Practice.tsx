@@ -21,9 +21,14 @@ export function TextDisplay({ target, typed }: { target: string; typed: string }
 
 export function Practice({ target, onNewText }: { target: string; onNewText: () => void }) {
   const [typed, setTyped] = useState('');
+  const [reversed, setReversed] = useState(false);
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reversing swaps the practice target to its mirror (and back); the typed
+  // progress resets because it cannot survive the flip.
+  const targetText = reversed ? Array.from(target).reverse().join('') : target;
 
   useEffect(
     () => () => {
@@ -34,11 +39,11 @@ export function Practice({ target, onNewText }: { target: string; onNewText: () 
     [],
   );
 
-  const correct = correctPrefix(target, typed);
+  const correct = correctPrefix(targetText, typed);
 
   const handleChange = (event: ReactChangeEvent<HTMLTextAreaElement>) => {
     // Real keystrokes (and native backspace) land here; blocked keys never do.
-    setTyped(event.target.value.slice(0, target.length));
+    setTyped(event.target.value.slice(0, targetText.length));
   };
 
   const blockPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
@@ -58,7 +63,7 @@ export function Practice({ target, onNewText }: { target: string; onNewText: () 
       event.preventDefault();
       return;
     }
-    if (typed.length >= target.length) {
+    if (typed.length >= targetText.length) {
       event.preventDefault();
       return;
     }
@@ -77,12 +82,12 @@ export function Practice({ target, onNewText }: { target: string; onNewText: () 
     }
   };
 
-  const complete = typed.length >= target.length && target.length > 0;
+  const complete = typed.length >= targetText.length && targetText.length > 0;
 
   return (
     <section className="practice">
       <div className="display-shell" onClick={() => inputRef.current?.focus()} data-testid="practice-display">
-        <TextDisplay target={target} typed={typed} />
+        <TextDisplay target={targetText} typed={typed} />
         <label className="visually-hidden" htmlFor="practice-input">
           Type the text shown above
         </label>
@@ -91,7 +96,7 @@ export function Practice({ target, onNewText }: { target: string; onNewText: () 
           ref={inputRef}
           className="practice-input"
           value={typed}
-          maxLength={target.length}
+          maxLength={targetText.length}
           autoFocus
           autoComplete="off"
           autoCorrect="off"
@@ -104,13 +109,22 @@ export function Practice({ target, onNewText }: { target: string; onNewText: () 
       </div>
 
       <p className="stats">
-        <span>{progressPercent(target, typed)}% typed correctly</span>
-        {accuracy(target, typed) !== null && <span> · {accuracy(target, typed)}% accuracy</span>}
+        <span>{progressPercent(targetText, typed)}% typed correctly</span>
+        {accuracy(targetText, typed) !== null && <span> · {accuracy(targetText, typed)}% accuracy</span>}
       </p>
 
       <div className="actions">
         <button type="button" className="primary" onClick={copyCorrect} disabled={correct.length === 0}>
           {copied ? 'Copied!' : 'Copy my correct text'}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setReversed((current) => !current);
+            setTyped('');
+          }}
+        >
+          {reversed ? 'Un-reverse text' : 'Reverse text'}
         </button>
         <button type="button" onClick={() => setTyped('')} disabled={typed.length === 0}>
           Start over

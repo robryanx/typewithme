@@ -72,7 +72,7 @@ That runs oxfmt check, Pretty PHP check, oxlint, Stylelint, JS + PHP tests, PHPS
 
 ## End-to-end sanity test
 
-Cypress checks the home screen renders and that a denied microphone shows the friendly fallback message (the practice flow itself needs a real microphone).
+Cypress drives the full practice flow by injecting text through the Cypress-only `typewithme:practice` event (the app registers the listener only when Cypress is driving the browser): green characters, mistakes fixed with backspace, and copying only the correct prefix. No OpenAI call is involved.
 
 ```bash
 bun run test:e2e:ci
