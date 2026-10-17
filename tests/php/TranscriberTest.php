@@ -27,6 +27,20 @@ final class TranscriberTest extends TestCase
         unlink((string) $path);
     }
 
+    public function testFilenameSniffsContainersFromMagicBytes(): void
+    {
+        // Firefox records OGG/Opus, however the upload is named.
+        self::assertSame('speech.ogg', Transcriber::filenameFor("OggS\0\x02data", 'speech.webm'));
+        self::assertSame('speech.webm', Transcriber::filenameFor("\x1aEߣwebm-data", 'speech.ogg'));
+        self::assertSame('speech.wav', Transcriber::filenameFor("RIFF\0\0\0\0WAVEfmt ", 'x.mystery'));
+        self::assertSame('speech.flac', Transcriber::filenameFor('fLaC-blocks', 'x.mystery'));
+        self::assertSame('speech.mp3', Transcriber::filenameFor('ID3 tags and frames', 'x.mystery'));
+        self::assertSame('speech.m4a', Transcriber::filenameFor("\0\0\0 ftypM4A ", 'x.mystery'));
+        // Nothing recognisable: trust the sanitised upload name.
+        self::assertSame('take5.mp3', Transcriber::filenameFor('random-bytes', 'take 5!.mp3'));
+        self::assertSame('speech.webm', Transcriber::filenameFor('random-bytes', ''));
+    }
+
     public function testRejectsAMissingUpload(): void
     {
         $client = new OpenAiTranscriptionClient('test-key', 'gpt-transcribe', static fn(): array => ['status' => 200, 'body' => '{}']);

@@ -30,11 +30,35 @@ final class Transcriber
         if ($audio === false) {
             throw new DomainException('The recording could not be read.', 422);
         }
-        $filename = preg_replace('/[^A-Za-z0-9._-]/', '', (string) ($upload['name'] ?? 'speech.webm'));
-        if (!is_string($filename) || $filename === '') {
-            $filename = 'speech.webm';
-        }
 
-        return ['text' => $this->client->transcribe($audio, $filename)];
+        return ['text' => $this->client->transcribe($audio, self::filenameFor($audio, (string) ($upload['name'] ?? '')))];
+    }
+
+    /**
+     * OpenAI dispatches on the file extension, so it must match the actual
+     * container. Browsers do not always agree with themselves: Firefox records
+     * OGG/Opus even when asked for webm, and names lie. Sniff the magic bytes
+     * first and fall back to the sanitised upload name.
+     */
+    public static function filenameFor(string $audio, string $fallbackName): string
+    {
+        $sniffed = match (substr($audio, 0, 4)) {
+            'OggS' => 'ogg',
+            "\x1aEߣ" => 'webm',  // EBML header shared by WebM/Matroska.
+            'RIFF' => str_starts_with(substr($audio, 8, 4), 'WAVE') ? 'wav' : null,
+            'fLaC' => 'flac',
+            default => null,
+        };
+        if ($sniffed !== null) {
+            return "speech.{$sniffed}";
+        }
+        if (str_starts_with($audio, 'ID3') || (strlen($audio) > 2 && $audio[0] === "\xff" && ((ord($audio[1]) & 0xE0) === 0xE0))) {
+            return 'speech.mp3';
+        }
+        if (substr($audio, 4, 4) === 'ftyp') {
+            return 'speech.m4a';
+        }
+        $fallback = preg_replace('/[^A-Za-z0-9._-]/', '', $fallbackName);
+        return is_string($fallback) && $fallback !== '' ? $fallback : 'speech.webm';
     }
 }
