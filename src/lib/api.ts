@@ -1,5 +1,5 @@
 // Dev runs on the Vite root with a proxied /api; production lives under
-// https://robserver.me/typewithme/ next to its PHP front controller.
+// https://robserver.me/typewithme next to its PHP front controller.
 export const API = import.meta.env.DEV ? '/api' : '/typewithme/api';
 
 export async function transcribeAudio(audio: Blob): Promise<string> {

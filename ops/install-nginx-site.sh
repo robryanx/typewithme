@@ -34,5 +34,5 @@ setfacl -m u:http:rx "$repo"
 nginx -t
 systemctl reload nginx
 
-echo "Installed: https://robserver.me/typewithme/"
+echo "Installed: https://robserver.me/typewithme"
 echo "Remember to build the frontend first: bun run build (in $repo)."

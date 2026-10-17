@@ -88,7 +88,7 @@ sudo pacman -S --needed gtk3 nss alsa-lib libxss libxtst xorg-server-xvfb
 
 ## Deployment (nginx under robserver.me)
 
-The site lives at `https://robserver.me/typewithme/` inside the existing managed vhost. One command as root installs the location blocks:
+The site lives at `https://robserver.me/typewithme` (no trailing slash — requests with one are redirected) inside the existing managed vhost. One command as root installs the location blocks:
 
 ```bash
 sudo ./ops/install-nginx-site.sh
