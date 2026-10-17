@@ -10,7 +10,6 @@ Built with React + Vite + TypeScript on the front and a small PHP JSON API on th
 2. The PHP API forwards the audio to OpenAI's speech-to-text endpoint using the server-side key, and returns the transcript.
 3. The transcript appears greyed-out. Every keystroke is compared character by character: green means correct, red means a mistake (fix it with backspace).
 4. **Copy my correct text** copies only the contiguous correctly-typed prefix — the part the kid actually got right — ready to paste into an online game.
-5. No microphone? Paste or type your own text to practise the same way.
 
 The OpenAI key never reaches the browser; only `.env` on the server holds it.
 
@@ -73,7 +72,7 @@ That runs oxfmt check, Pretty PHP check, oxlint, Stylelint, JS + PHP tests, PHPS
 
 ## End-to-end sanity test
 
-Cypress drives the paste-your-own-text path (so no OpenAI key is needed): practice a text, hit green characters, make and fix a mistake, and verify the copy button sends only the correct prefix to the clipboard.
+Cypress checks the home screen renders and that a denied microphone shows the friendly fallback message (the practice flow itself needs a real microphone).
 
 ```bash
 bun run test:e2e:ci

@@ -11,7 +11,6 @@ export function normalizeText(text: string): string {
 
 export function App() {
   const [view, setView] = useState<View>({ kind: 'home' });
-  const [draft, setDraft] = useState('');
 
   if (view.kind === 'practice') {
     return (
@@ -43,29 +42,6 @@ export function App() {
           }
         }}
       />
-      <section className="manual">
-        <h2>Or paste your own text</h2>
-        <textarea
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="Type or paste the text you want to practise…"
-          rows={4}
-        />
-        <button
-          type="button"
-          className="primary"
-          disabled={normalizeText(draft) === ''}
-          onClick={() => {
-            const clean = normalizeText(draft);
-            if (clean !== '') {
-              setDraft('');
-              setView({ kind: 'practice', text: clean });
-            }
-          }}
-        >
-          Start typing practice
-        </button>
-      </section>
     </main>
   );
 }

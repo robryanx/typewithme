@@ -63,21 +63,6 @@ header h1 {
   color: #a01414;
 }
 
-.manual {
-  margin-top: 32px;
-}
-
-.manual textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 12px;
-  font: inherit;
-  box-sizing: border-box;
-  border: 2px solid #090909;
-  border-radius: 10px;
-}
-
 button.primary,
 .actions button {
   font: inherit;
