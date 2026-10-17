@@ -49,4 +49,14 @@ describe('typing practice', () => {
     cy.visit('/?text=');
     cy.contains('Tap and speak your text').should('be.visible');
   });
+
+  it('explains what to fix when the microphone is blocked', () => {
+    cy.visit('/', {
+      onBeforeLoad(win) {
+        cy.stub(win.navigator.mediaDevices, 'getUserMedia').rejects(new DOMException('denied', 'NotAllowedError'));
+      },
+    });
+    cy.get('button.mic').click();
+    cy.contains('blocked here').should('be.visible');
+  });
 });

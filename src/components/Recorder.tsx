@@ -28,6 +28,11 @@ export function Recorder({ onText }: { onText: (text: string) => void }) {
 
   const start = useCallback(async () => {
     setError(null);
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setError('This browser cannot record audio on this page. Try Chrome, or update Firefox.');
+      setState('idle');
+      return;
+    }
     setState('asking');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -45,8 +50,23 @@ export function Recorder({ onText }: { onText: (text: string) => void }) {
       recorderRef.current = recorder;
       recorder.start();
       setState('recording');
-    } catch {
-      setError('I could not use the microphone. Check the browser permission, or paste your text instead.');
+    } catch (cause) {
+      // Firefox fails instantly (no prompt) when the Android app itself lacks
+      // microphone permission, or the site was previously blocked — each needs
+      // a different fix, so tell the user which one applies. Duck-type the
+      // name: cross-realm DOMExceptions fail instanceof checks.
+      const name = (cause as { name?: string } | null)?.name ?? '';
+      if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        setError('No microphone was found on this device.');
+      } else if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') {
+        setError(
+          'The microphone is blocked here. In Firefox: tap the padlock in the address bar, set Microphone to Allowed — and check Android Settings → Apps → Firefox → Permissions → Microphone. In Chrome: tap the padlock and allow the microphone.',
+        );
+      } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+        setError('The microphone is busy in another app. Close that app and try again.');
+      } else {
+        setError(cause instanceof Error ? `Microphone error: ${cause.message}` : 'Could not start recording.');
+      }
       setState('idle');
     }
   }, [upload]);
