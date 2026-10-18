@@ -10,6 +10,65 @@ function matchesCaseInsensitive(typedChar: string | undefined, expected: string)
   return typedChar !== undefined && typedChar.toLowerCase() === expected.toLowerCase();
 }
 
+function isPunctuation(char: string): boolean {
+  return /\p{P}/u.test(char);
+}
+
+/**
+ * Reconciles the raw keystrokes with the target: whenever the kid types the
+ * letter that follows a target punctuation symbol (skipping the symbol — the
+ * transcription adds punctuation nobody wants to type), the symbol is
+ * inserted into the typed text as if it had been typed correctly, and the
+ * keystroke counts for the letter after it.
+ */
+export function withAutoPunctuation(target: string, raw: string): string {
+  let result = '';
+  let rawIndex = 0;
+  let targetIndex = 0;
+  let sawMistake = false;
+  while (rawIndex < raw.length && targetIndex < target.length) {
+    const rawChar = raw[rawIndex] as string;
+    const targetChar = target[targetIndex] as string;
+    if (matchesCaseInsensitive(rawChar, targetChar)) {
+      result += targetChar;
+      rawIndex++;
+      targetIndex++;
+      continue;
+    }
+    if (isPunctuation(targetChar) && !isPunctuation(rawChar)) {
+      let afterPunctuation = targetIndex;
+      while (afterPunctuation < target.length && isPunctuation(target[afterPunctuation] as string)) {
+        afterPunctuation++;
+      }
+      const next = target[afterPunctuation];
+      if (next !== undefined && matchesCaseInsensitive(rawChar, next)) {
+        // The keystroke belongs after the punctuation run: insert the run
+        // green and let the next loop iteration match the keystroke itself.
+        result += target.slice(targetIndex, afterPunctuation);
+        targetIndex = afterPunctuation;
+        continue;
+      }
+    }
+    // A genuine mistake: keep the raw character so it shows red.
+    result += rawChar;
+    rawIndex++;
+    targetIndex++;
+    sawMistake = true;
+  }
+  // With every keystroke spent and nothing mistyped, trailing punctuation
+  // (like the final '!') inserts itself instead of blocking completion.
+  if (!sawMistake && raw.length > 0 && rawIndex === raw.length) {
+    let end = targetIndex;
+    while (end < target.length && isPunctuation(target[end] as string)) {
+      end++;
+    }
+    if (end === target.length && end > targetIndex) {
+      result += target.slice(targetIndex, end);
+    }
+  }
+  return result;
+}
+
 /**
  * Compares the typed text against the target character by character. Wrong
  * keystrokes stay visible (red) and the cursor keeps moving; kids fix them

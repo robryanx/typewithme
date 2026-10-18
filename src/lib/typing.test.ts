@@ -1,4 +1,4 @@
-import { buildProgress, accuracy, correctPrefix, progressPercent } from './typing';
+import { buildProgress, accuracy, correctPrefix, progressPercent, withAutoPunctuation } from './typing';
 
 test('pending chars stay pending and correct chars turn correct', () => {
   const progress = buildProgress('cat', 'ca');
@@ -39,6 +39,41 @@ test('case differences count as correct', () => {
   const progress = buildProgress('Hello World', 'hELLO wORLD');
   expect(progress.every((c) => c.status === 'correct')).toBe(true);
   expect(progress[0]?.char).toBe('H');
+});
+
+test('skipped target punctuation is auto-inserted when the next letter is typed', () => {
+  expect(withAutoPunctuation('hey, rob', 'hey, rob')).toBe('hey, rob');
+  expect(withAutoPunctuation('hey, rob', 'hey rob')).toBe('hey, rob');
+  expect(withAutoPunctuation('wait... what', 'wait what')).toBe('wait... what');
+  expect(withAutoPunctuation("don't stop", 'dont stop')).toBe("don't stop");
+});
+
+test('auto-inserted punctuation keeps the target casing and counts as typed', () => {
+  expect(withAutoPunctuation('Hey, Rob!', 'hey rob')).toBe('Hey, Rob!');
+});
+
+test('typing the punctuation yourself still works', () => {
+  expect(withAutoPunctuation('hey, rob', 'hey,')).toBe('hey,');
+});
+
+test('punctuation is only skipped when the following letter matches', () => {
+  // A wrong letter at the punctuation position stays a mistake (red).
+  expect(withAutoPunctuation('hey, rob', 'heyx')).toBe('heyx');
+  // Before the next letter is typed, nothing is inserted yet.
+  expect(withAutoPunctuation('hey, rob', 'hey')).toBe('hey');
+});
+
+test('trailing punctuation inserts itself once everything else matched', () => {
+  expect(withAutoPunctuation('Hey, Rob!', 'hey rob')).toBe('Hey, Rob!');
+  // But not after a mistake — the kid still has to fix that first.
+  expect(withAutoPunctuation('Hey, Rob!', 'hey robx')).toBe('Hey, Robx');
+  // And not when there is typing left to do.
+  expect(withAutoPunctuation('Hey, Rob!', 'hey')).toBe('Hey');
+});
+
+test('backspace removes auto-inserted punctuation normally', () => {
+  expect(withAutoPunctuation('hey, rob', 'hey, ro')).toBe('hey, ro');
+  expect(withAutoPunctuation('hey, rob', 'hey, r')).toBe('hey, r');
 });
 
 test('accuracy counts matching keystrokes, null before typing', () => {

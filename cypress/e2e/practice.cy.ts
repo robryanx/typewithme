@@ -45,6 +45,17 @@ describe('typing practice', () => {
     cy.contains('button', 'Un-reverse text').should('be.visible');
   });
 
+  it('auto-inserts required punctuation the kid skips', () => {
+    // Dictation adds a comma nobody wants to type: typing the next letter
+    // inserts it green and continues.
+    cy.visit('/?text=hello%2C%20world');
+    cy.get('#practice-input').type('hello world');
+    cy.get('[data-testid="practice-display"] .correct').should('have.length', 12);
+    cy.window().then((win) => cy.stub(win.navigator.clipboard, 'writeText').resolves());
+    cy.contains('button', 'Copy my correct text').click();
+    cy.window().then((win) => expect(win.navigator.clipboard.writeText).to.have.been.calledWith('hello, world'));
+  });
+
   it('ignores empty injected text', () => {
     cy.visit('/?text=');
     cy.contains('Tap and speak your text').should('be.visible');

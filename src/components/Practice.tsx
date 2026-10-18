@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent as ReactChangeEvent, ClipboardEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { buildProgress, accuracy, correctPrefix, progressPercent } from '../lib/typing';
+import { buildProgress, accuracy, correctPrefix, progressPercent, withAutoPunctuation } from '../lib/typing';
 
 /** The greyed-out target text with green/red per-character feedback and a caret. */
 export function TextDisplay({ target, typed }: { target: string; typed: string }) {
@@ -43,7 +43,9 @@ export function Practice({ target, onNewText }: { target: string; onNewText: () 
 
   const handleChange = (event: ReactChangeEvent<HTMLTextAreaElement>) => {
     // Real keystrokes (and native backspace) land here; blocked keys never do.
-    setTyped(event.target.value.slice(0, targetText.length));
+    // Required punctuation the kid skips is auto-inserted as green.
+    const raw = event.target.value.slice(0, targetText.length);
+    setTyped(withAutoPunctuation(targetText, raw));
   };
 
   const blockPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
